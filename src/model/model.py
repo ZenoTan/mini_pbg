@@ -2,7 +2,7 @@ import torch as th
 import torch.nn as nn
 import torch.multiprocessing as mp
 import torch.nn.functional as F
-from ..config.config import ModelConfig
+# from .config.config import ModelConfig
 
 
 class Operator(nn.Module):
@@ -51,9 +51,10 @@ class DotComparator(nn.Module):
 
 class Model(nn.Module):
 	def __init__(self, model_config):
+		super(Model, self).__init__()
 		self.ent_size = model_config.num_dict['ent_size']
 		self.rel_size = model_config.num_dict['rel_size']
-		self.dim = model_config.num_dict['dim'] = dim
+		self.dim = model_config.num_dict['dim']
 		self.emb = nn.Parameter(th.rand(self.ent_size, self.dim))
 		self.head_operator = model_config.head_operator
 		self.tail_operator = model_config.tail_operator
