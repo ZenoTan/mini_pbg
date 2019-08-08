@@ -16,21 +16,16 @@ class DataLoader(object):
 		if self.cols == None:
 			return None
 		file = open(file_name)
-        head_index = th.zeros([num_line], dtype=th.long)
-        tail_index = th.zeros([num_line], dtype=th.long)
-        rel_index = th.zeros([num_line], dtype=th.long)
-        for i in range(num_line):
-        	line = file.read_line()
-        	if line == '':
-        		break
-        	cols = line.split()
-        	head_index[i] = long(cols[self.cols[0]])
-        	rel_index[i] = long(cols[self.cols[1]])
-        	tail_index[i] = long(cols[self.cols[2]])
-        file.close()
-        if self.order == 'head-rel-tail':
-        	return head_index, rel_index, tail_index
-        elif self.order == 'head-tail-rel':
-        	return head_index, tail_index, rel_index
-        else:
-        	return rel_index, head_index, tail_index
+	head_index = th.zeros([num_line], dtype=th.long)
+	tail_index = th.zeros([num_line], dtype=th.long)
+	rel_index = th.zeros([num_line], dtype=th.long)
+	for i in range(num_line):
+		line = file.read_line()
+		if line == '':
+			break
+		cols = line.split()
+		head_index[i] = long(cols[self.cols[0]])
+		rel_index[i] = long(cols[self.cols[1]])
+		tail_index[i] = long(cols[self.cols[2]])
+	file.close()
+	return {'head_index': head_index, 'tail_index': tail_index, 'rel_index': rel_index}

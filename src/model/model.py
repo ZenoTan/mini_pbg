@@ -59,7 +59,7 @@ class Model(nn.Module):
 		self.head_operator = model_config.head_operator
 		self.tail_operator = model_config.tail_operator
 		self.comparator = model_config.comparator
-		self.chunk_size = model_config.num_dict['chunk_size']
+		self.num_chunk = model_config.num_dict['num_chunk']
 		self.pos_num = model_config.num_dict['pos_num']
 		self.neg_num = model_config.num_dict['neg_num']
 		self.mask = th.zeros([self.pos_num, self.pos_num + self.neg_num])
@@ -75,10 +75,10 @@ class Model(nn.Module):
 		tail_neg_index = th.cat((tail_index, tail_neg_index), dim=-1)
 		head_neg = F.embedding(head_neg_index, self.emb, sparse=True)
 		tail_neg = F.embedding(tail_neg_index, self.emb, sparse=True)
-		head = head.view(self.chunk_size, self.pos_num, self.dim)
-		tail = tail.view(self.chunk_size, self.pos_num, self.dim)
-		head_neg = head_neg.view(self.chunk_size, self.pos_num + self.neg_num, self.dim)
-		tail_neg = tail_neg.view(self.chunk_size, self.pos_num + self.neg_num, self.dim)
+		head = head.view(self.num_chunk, self.pos_num, self.dim)
+		tail = tail.view(self.num_chunk, self.pos_num, self.dim)
+		head_neg = head_neg.view(self.num_chunk, self.pos_num + self.neg_num, self.dim)
+		tail_neg = tail_neg.view(self.num_chunk, self.pos_num + self.neg_num, self.dim)
 		if head_operator:
 			head_ = self.head_operator(head, rel_index)
 		else:

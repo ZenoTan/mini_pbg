@@ -1,0 +1,68 @@
+import torch as th
+import torch.multiprocessing as mp
+import torch.nn.functional as F
+import time
+
+def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
+	num_iter = head_index.size()[0]
+	head_neg_index = th.randint(0, model.ent_size, [num_iter, model.num_chunk * model.neg_num])
+	tail_neg_index = th.randint(0, model.ent_size, [num_iter, model.num_chunk * model.neg_num])
+	# rel_neg_index = th.randint(0, model.rel_size, [num_iter, model.num_chunk * model.neg_num])
+	t0 = time.time()
+	for i in range(num_iter):
+		model.zero_grad()
+		head_pos, head_neg, tail_pos, tail_neg = model(head_index[i], tail_index[i], th.cat((head_index[i], head_neg_index[i]), dim=-1), th.cat((tail_index[i], tail_neg_index[i]), dim=-1), rel_index[i])
+		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
+		loss.backward()
+		model.optim.step()
+	t1 = time.time()
+	print("Rank " + str(rank) + ": " + str(t1 - t0))
+
+class Loss(object):
+	def __init__(self, batch_size):
+		self.batch_size = batch_size
+
+	def loss(self, head_pos, head_neg, tail_pos, tail_neg):
+		return None
+
+class SoftmaxLoss(Loss):
+	def __init__(self, batch_size):
+		super(SoftmaxLoss, self).__init__(batch_size)
+		self.target = th.zeros([batch_size], dtype=th.long)
+
+	def loss(self, head_pos, head_neg, tail_pos, tail_neg):
+		head_scores = th.cat([head_pos, head_neg.logsumexp(dim=1, keepdim=True)], dim=1)
+		tail_scores = th.cat([tail_pos, tail_neg.logsumexp(dim=1, keepdim=True)], dim=1)
+		loss = F.cross_entropy(head_scores, target) + F.cross_entropy(tail_scores, target)
+		return loss
+
+class Trainer(object):
+	def __init__(self, train_config):
+		self.data_path = train_config.data_path
+		self.data_order = train_config.data_order
+		self.num_edge = train_config.num_edge
+		self.model_config = train_config.model_config
+		self.num_proc = train_config.num_proc
+		self.num_epoch = train_config.num_epoch
+		self.loss_func = train_config.loss_func
+
+	def train(self):
+		data_loader = DataLoader(self.data_order)
+		dataset = data_loader.load(self.data_path, self.num_edge)
+		head_index = dataset['head_index']
+		tail_index = dataset['tail_index']
+		rel_index = dataset['rel_index']
+		model = Model(self.model_config)
+		model.share_memory()
+		for epoch in range(self.num_epoch):
+			perm = th.randperm(self.num_edge):
+			head_index = head_index[perm].view(self.num_proc, -1, model.num_chunk * model.pos_num)
+			tail_index = tail_index[perm].view(self.num_proc, -1, model.num_chunk * model.pos_num)
+			rel_index = rel_index[perm].view(self.num_proc, -1, model.num_chunk * model.pos_num)
+			procs = []
+			for proc in range(self.num_proc):
+				p = mp.Process(target=train_proc, args=(model, proc, head_index[proc], tail_index[proc], rel_index[proc]))
+				p.start()
+				procs.append(p)
+			for p in procs:
+				p.join()
