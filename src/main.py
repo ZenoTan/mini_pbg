@@ -4,6 +4,7 @@ from data import DataLoader
 from train import *
 from network import *
 import torch as th
+import torch.multiprocessing as mp
 import time
 
 def test_train():
@@ -20,6 +21,9 @@ def test_train():
 	t1 = time.time()
 	print('Finish all: ' + str(t1 - t0))
 
+def server_proc(server):
+	server.run()
+
 def test_rpc():
 	head_operator = ComplExOperator(14824, 400)
 	tail_operator = ComplExOperator(14824, 400)
@@ -29,12 +33,15 @@ def test_rpc():
 	handler = SimpleHandler('simple', model)
 	server = SharedEmbeddingServer(10314)
 	server.add_handler(handler)
-	server.run()
-	client = SharedEmbddingClient(10314)
+	# server.run()
+	p = mp.Process(target=server_proc, args=(server, ))
+	p.start()
+	client = SharedEmbeddingClient(10314)
 	index = th.randint(0, 10000, [10])
 	data = th.randn(10)
-	print(data)
-	client.put_entity_embedding('simple', index, data)
+	print('Start')
+	print(type(index))
+	#client.put_entity_embedding('simple', index, data)
 	data_ = client.get_entity_embedding('simple', index)
 	print(data_)
 

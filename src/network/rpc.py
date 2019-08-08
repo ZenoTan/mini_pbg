@@ -16,13 +16,13 @@ class SharedEmbeddingServer(object):
 			else:
 				return None
 
-		def put_embedding(emb_type, emb_id):
+		def put_embedding(name, emb_type, emb_id, data):
 			if name not in self.handlers:
 				return
 			if emb_type == 'entity':
-				return self.handlers[name].put_entity(emb_id)
+				return self.handlers[name].put_entity(emb_id, data)
 			elif emb_type == 'relation':
-				return self.handlers[name].put_relation(emb_id)
+				return self.handlers[name].put_relation(emb_id, data)
 			else:
 				return
 
@@ -38,20 +38,20 @@ class SharedEmbeddingServer(object):
 			del self.handlers[handler_name]
 
 	def run(self):
-		self.server.handle_request()
+		self.server.serve_forever()
 
 class SharedEmbeddingClient(object):
 	def __init__(self, port):
 		self.client = xmlrpc.client.ServerProxy('http://localhost:' + str(port))
 
-	def get_entity_embedding(self, emb_id):
-		self.client.get_embedding('entity', emb_id)
+	def get_entity_embedding(self, name, emb_id):
+		self.client.get_embedding(name, 'entity', emb_id)
 
-	def get_relation_embedding(self, emb_id):
-		self.client.get_embedding('relation', emb_id)
+	def get_relation_embedding(self, name, emb_id):
+		self.client.get_embedding(name, 'relation', emb_id)
 
-	def put_entity_embedding(self, emb_id):
-		self.client.put_embedding('entity', emb_id)
+	def put_entity_embedding(self, name, emb_id, data):
+		self.client.put_embedding(name, 'entity', emb_id, data)
 
-	def put_relation_embedding(self, emb_id):
-		self.client.put_embedding('relation', emb_id)
+	def put_relation_embedding(self, name, emb_id, data):
+		self.client.put_embedding(name, 'relation', emb_id, data)

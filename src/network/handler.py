@@ -25,10 +25,10 @@ class SimpleHandler(Handler):
 		super(SimpleHandler, self).__init__(name, model)
 
 	def get_entity(self, emb_id):
-		return F.embedding(emb_id, model.emb.data, sparse=True)
+		return F.embedding(emb_id, self.model.emb.data, sparse=True)
 
 	def put_entity(self, emb_id, data):
-		model.emb.data[emb_id] = data
+		self.model.emb.data[emb_id] = data
 
 	def get_relation(self, emb_id):
 		return None
