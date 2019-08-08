@@ -28,8 +28,8 @@ class ComplExOperator(Operator):
 		emb_real = emb[..., :self.dim // 2]
 		emb_imag = emb[..., self.dim // 2:]
 		emb_complex = th.empty_like(emb)
-		emb_complex[..., :self.dim] = emb_real * rel_real - emb_imag * rel_imag
-		emb_complex[..., self.dim:] = emb_real * rel_imag + emb_imag * rel_real
+		emb_complex[..., :self.dim // 2] = emb_real * rel_real - emb_imag * rel_imag
+		emb_complex[..., self.dim // 2:] = emb_real * rel_imag + emb_imag * rel_real
 		return emb_complex
 
 class Comparator(nn.Module):
@@ -79,22 +79,26 @@ class Model(nn.Module):
 		tail = tail.view(self.num_chunk, self.pos_num, self.dim)
 		head_neg = head_neg.view(self.num_chunk, self.pos_num + self.neg_num, self.dim)
 		tail_neg = tail_neg.view(self.num_chunk, self.pos_num + self.neg_num, self.dim)
-		if head_operator:
+		if self.head_operator:
 			head_ = self.head_operator(head, rel_index)
 		else:
 			head_ = head
-		if tail_operator:
+		if self.tail_operator:
 			tail_ = self.tail_operator(tail, rel_index)
 		else:
 			tail_ = tail
 		head_pos_scores, head_neg_scores = self.comparator(head_, tail, tail_neg)
 		tail_pos_scores, tail_neg_scores = self.comparator(tail_, head, head_neg)
-		head_neg_scores += mask
-		tail_neg_scores += mask
-		head_pos_scores.flatten(0, 1)
-		tail_pos_scores.flatten(0, 1)
-		head_neg_scores.flatten(0, 1)
-		tail_neg_scores.flatten(0, 1)
-		head_pos_scores.unsqueeze(1)
-		tail_pos_scores.unsqueeze(1)
+		head_neg_scores += self.mask
+		tail_neg_scores += self.mask
+		# head_pos_scores.flatten(0, 1)
+		# tail_pos_scores.flatten(0, 1)
+		# head_neg_scores.flatten(0, 1)
+		# tail_neg_scores.flatten(0, 1)
+		# head_pos_scores.unsqueeze(1)
+		# tail_pos_scores.unsqueeze(1)
+		head_pos_scores = head_pos_scores.view(self.pos_num, -1)
+		tail_pos_scores = tail_pos_scores.view(self.pos_num, -1)
+		head_neg_scores = head_neg_scores.view(self.pos_num, -1)
+		tail_neg_scores = tail_neg_scores.view(self.pos_num, -1)
 		return head_pos_scores, tail_pos_scores, head_neg_scores, tail_neg_scores
