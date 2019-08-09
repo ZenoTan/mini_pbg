@@ -45,10 +45,10 @@ class SharedEmbeddingClient(object):
 		self.client = xmlrpc.client.ServerProxy('http://localhost:' + str(port))
 
 	def get_entity_embedding(self, name, emb_id):
-		self.client.get_embedding(name, 'entity', emb_id)
+		return self.client.get_embedding(name, 'entity', emb_id)
 
 	def get_relation_embedding(self, name, emb_id):
-		self.client.get_embedding(name, 'relation', emb_id)
+		return self.client.get_embedding(name, 'relation', emb_id)
 
 	def put_entity_embedding(self, name, emb_id, data):
 		self.client.put_embedding(name, 'entity', emb_id, data)
