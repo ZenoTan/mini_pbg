@@ -1,3 +1,3 @@
 # mini_pbg
 
-Train knowledge graph as pbg, using dgl.
+Train knowledge graph leveraging pbg and dgl.
