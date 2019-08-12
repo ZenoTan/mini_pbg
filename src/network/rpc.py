@@ -1,5 +1,6 @@
 from xmlrpc.server import SimpleXMLRPCServer
 import xmlrpc.client
+import torch as th
 
 class SharedEmbeddingServer(object):
 	def __init__(self, port):
@@ -10,9 +11,9 @@ class SharedEmbeddingServer(object):
 			if name not in self.handlers:
 				return None
 			if emb_type == 'entity':
-				return self.handlers[name].get_entity(emb_id)
+				return self.handlers[name].get_entity(th.tensor(emb_id))
 			elif emb_type == 'relation':
-				return self.handlers[name].get_relation(emb_id)
+				return self.handlers[name].get_relation(th.tensor(emb_id))
 			else:
 				return None
 
@@ -20,9 +21,9 @@ class SharedEmbeddingServer(object):
 			if name not in self.handlers:
 				return
 			if emb_type == 'entity':
-				return self.handlers[name].put_entity(emb_id, data)
+				return self.handlers[name].put_entity(th.tensor(emb_id), th.tensor(data)).tolist()
 			elif emb_type == 'relation':
-				return self.handlers[name].put_relation(emb_id, data)
+				return self.handlers[name].put_relation(th.tensor(emb_id), th.tensor(data)).tolist()
 			else:
 				return
 
