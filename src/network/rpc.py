@@ -11,9 +11,9 @@ class SharedEmbeddingServer(object):
 			if name not in self.handlers:
 				return None
 			if emb_type == 'entity':
-				return self.handlers[name].get_entity(th.tensor(emb_id))
+				return self.handlers[name].get_entity(th.tensor(emb_id)).tolist()
 			elif emb_type == 'relation':
-				return self.handlers[name].get_relation(th.tensor(emb_id))
+				return self.handlers[name].get_relation(th.tensor(emb_id)).tolist()
 			else:
 				return None
 
@@ -21,9 +21,9 @@ class SharedEmbeddingServer(object):
 			if name not in self.handlers:
 				return
 			if emb_type == 'entity':
-				return self.handlers[name].put_entity(th.tensor(emb_id), th.tensor(data)).tolist()
+				return self.handlers[name].put_entity(th.tensor(emb_id), th.tensor(data))
 			elif emb_type == 'relation':
-				return self.handlers[name].put_relation(th.tensor(emb_id), th.tensor(data)).tolist()
+				return self.handlers[name].put_relation(th.tensor(emb_id), th.tensor(data))
 			else:
 				return
 
