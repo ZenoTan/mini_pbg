@@ -1,6 +1,7 @@
 import torch as th
 import torch.multiprocessing as mp
 from network import BaseServer, BaseClient
+import thread
 
 class Proxy(object)
 	def __init__(self, config):
@@ -45,6 +46,19 @@ class Proxy(object)
 				data = ch.get()
 				return data
 
+def listen(handler, proxy, local, remote):
+	while True:
+		header = proxy.recv(remote, local)
+		emb_id = proxy.recv(remote, local)
+		if header == 'get':
+			data = handler.get_entity(emb_id)
+			proxy.send(local, remote, data)
+		elif header == 'put':
+			data = proxy.recv(remote, local)
+			handler.put_entity(emb_id, data)
+		else:
+			pass
+
 class SharedMultiServer(BaseServer):
 	def __init__(self, proxy):
 		super(SharedMultiServer, self).__init__()
@@ -54,36 +68,38 @@ class SharedMultiServer(BaseServer):
 	def init_channel(self):
 		for src, dst in self.proxy.network:
 			if dst in self.handlers and (dst, src) in self.proxy.network:
-				self.channels.append((dst, src))
+				self.channels.append((src, dst))
 
-	def get_embedding(self, src, dst, emb_type, emb_id):
-		if name not in self.handlers:
-			return None
-		if (src, dst) not in self.proxy.network
-			return None
-		if emb_type == 'entity':
-			data = self.handlers[name].get_entity(emb_id)
-			proxy.send(src, dst, data)
-		elif emb_type == 'relation':
-			data self.handlers[name].get_relation(emb_id)
-			proxy.send(src, dst, data)
-		else:
-			return None
+	# def get_embedding(self, src, dst, emb_type, emb_id):
+	# 	if name not in self.handlers:
+	# 		return None
+	# 	if (src, dst) not in self.proxy.network
+	# 		return None
+	# 	if emb_type == 'entity':
+	# 		data = self.handlers[name].get_entity(emb_id)
+	# 		proxy.send(src, dst, data)
+	# 	elif emb_type == 'relation':
+	# 		data = self.handlers[name].get_relation(emb_id)
+	# 		proxy.send(src, dst, data)
+	# 	else:
+	# 		return None
 
-	def put_embedding(self, src, dst, emb_type, emb_id):
-		if name not in self.handlers:
-			return
-		if (src, dst) not in self.proxy
-			return
-		if emb_type == 'entity':
-			return self.handlers[name].put_entity(emb_id, data)
-		elif emb_type == 'relation':
-			return self.handlers[name].put_relation(emb_id, data)
-		else:
-			return
+	# def put_embedding(self, src, dst, emb_type, emb_id):
+	# 	if name not in self.handlers:
+	# 		return
+	# 	if (src, dst) not in self.proxy
+	# 		return
+	# 	if emb_type == 'entity':
+	# 		return self.handlers[name].put_entity(emb_id, data)
+	# 	elif emb_type == 'relation':
+	# 		return self.handlers[name].put_relation(emb_id, data)
+	# 	else:
+	# 		return
 
 	def run(self):
-		pass
+		self.init_channel()
+		for src, dst in self.channels:
+			thread.start_new_thread(listen, (self.handlers[src], self.proxy, src, dst))
 
 class SharedMultiClient(BaseClient):
 	def __init__(self, sender, proxy):
@@ -92,13 +108,18 @@ class SharedMultiClient(BaseClient):
 		self.proxy = proxy
 
 	def get_entity_embedding(self, name, emb_id):
-		return self.client.get_embedding(name, 'entity', emb_id)
+		proxy.send(src, name, 'get')
+		proxy.send(src, name, emb_id)
+		data = proxy.recv(name, src)
+		return data
 
 	def get_relation_embedding(self, name, emb_id):
-		return self.client.get_embedding(name, 'relation', emb_id)
+		return None
 
 	def put_entity_embedding(self, name, emb_id, data):
-		self.client.put_embedding(name, 'entity', emb_id, data)
+		proxy.send(src, name, 'get')
+		proxy.send(src, name, emb_id)
+		proxy.send(src, name, data)
 
 	def put_relation_embedding(self, name, emb_id, data):
-		self.client.put_embedding(name, 'relation', emb_id, data)
+		pass
