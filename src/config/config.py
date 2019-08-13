@@ -21,3 +21,16 @@ class TrainConfig(object):
 		self.num_proc = num_proc
 		self.num_epoch = num_epoch
 		self.loss_func = loss_func
+
+class MultiProcessConfig(object):
+	def __init__(self, num_rank, is_connected=True, network=None, method='pipe'):
+		self.num_rank = num_rank
+		if not is_connected:
+			self.network = network
+		else:
+			self.network = []
+			for src in range(num_rank):
+				for dst in range(num_rank):
+					if src != dst:
+						network.append((src, dst))
+		self.method = method
