@@ -1,9 +1,9 @@
 import torch as th
 import torch.multiprocessing as mp
-from network import BaseServer, BaseClient
-import thread
+from .network import BaseServer, BaseClient
+import threading
 
-class Proxy(object)
+class Proxy(object):
 	def __init__(self, config):
 		# super(WorkerManager, self).__init__()
 		self.num_rank = config.num_rank
@@ -35,7 +35,7 @@ class Proxy(object)
 				ch.put(data)
 
 	def recv(self, src, dst):
-		ch = self.get_channel((src, dst)):
+		ch = self.get_channel((src, dst))
 		if ch == None:
 			return -1
 		else:
@@ -99,8 +99,8 @@ class SharedMultiServer(BaseServer):
 	def run(self):
 		self.init_channel()
 		for src, dst in self.channels:
-			thread.start_new_thread(listen, (self.handlers[src], self.proxy, src, dst))
-
+			thread = threading.Thread(listen, (self.handlers[src], self.proxy, src, dst))
+			thread.start()
 class SharedMultiClient(BaseClient):
 	def __init__(self, sender, proxy):
 		super(SharedMultiClient, self).__init__()
@@ -117,7 +117,7 @@ class SharedMultiClient(BaseClient):
 		return None
 
 	def put_entity_embedding(self, name, emb_id, data):
-		proxy.send(src, name, 'get')
+		proxy.send(src, name, 'put')
 		proxy.send(src, name, emb_id)
 		proxy.send(src, name, data)
 

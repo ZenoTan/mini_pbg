@@ -13,7 +13,7 @@ class BaseServer(object):
 	def run(self):
 		pass
 
-class BaseCient(object):
+class BaseClient(object):
 	def __init__(self):
 		pass
 
