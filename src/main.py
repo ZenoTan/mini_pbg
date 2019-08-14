@@ -1,5 +1,5 @@
 from model import *
-from config import ModelConfig, TrainConfig
+from config import *
 from data import DataLoader
 from train import *
 from network import *
@@ -49,5 +49,30 @@ def test_rpc():
 	t1 = time.time()
 	print(t1 - t0)
 
+def test_ipc(method):
+	head_operator = ComplExOperator(14824, 400)
+	tail_operator = ComplExOperator(14824, 400)
+	comparator = DotComparator()
+	model_config = ModelConfig(head_operator, tail_operator, comparator, 1305371, 14824, 400, 1, 1000, 1000, 'Adagrad')
+	model = Model(model_config)
+	handler = SimpleHandler(0, model)
+	multi_config = MultiProcessConfig(2, method)
+	proxy = Proxy(multi_config)
+	server = SharedMultiServer(proxy)
+	server.add_handler(handler)
+	p = mp.Process(target=server_proc, args=(server, ))
+	p.start()
+	client = SharedMultiClient(1, proxy)
+	index = th.randint(0, 1000, [1000])
+	data = th.randn(1000, 400)
+	# print(data[0][0])
+	t0 = time.time()
+	for i in range(10000):
+		client.put_entity_embedding(0, index, data)
+		data_ = client.get_entity_embedding(0, index)
+		# print(data_[0][0])
+	t1 = time.time()
+	print(t1 - t0)
+
 if __name__ == '__main__':
-	test_rpc()
+	test_ipc('queue')

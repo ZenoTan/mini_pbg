@@ -29,16 +29,16 @@ class SimpleHandler(Handler):
 		t0 = time.time()
 		entity = F.embedding(emb_id, self.model.emb.data, sparse=True)
 		t1 = time.time()
-		print('get: ' + str(t1 - t0))
+		# print('get: ' + str(t1 - t0))
 		return entity
 
 	def put_entity(self, emb_id, data):
 		t0 = time.time()
 		self.model.emb.data[emb_id] = data
 		t1 = time.time()
-		print('put: ' + str(t1 - t0))
-		#for i in range(len(data)):
-		#	self.model.emb.data[emb_id[i]] = th.tensor(data[i])
+		# print('put: ' + str(t1 - t0))
+		# for i in range(len(data)):
+		# 	self.model.emb.data[emb_id[i]] = th.tensor(data[i])
 		return 1
 
 	def get_relation(self, emb_id):

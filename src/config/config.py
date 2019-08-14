@@ -32,5 +32,5 @@ class MultiProcessConfig(object):
 			for src in range(num_rank):
 				for dst in range(num_rank):
 					if src != dst:
-						network.append((src, dst))
+						self.network.append((src, dst))
 		self.method = method
