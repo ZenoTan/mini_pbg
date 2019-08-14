@@ -74,5 +74,32 @@ def test_ipc(method):
 	t1 = time.time()
 	print(t1 - t0)
 
+def test_kv():
+	head_operator = ComplExOperator(14824, 400)
+	tail_operator = ComplExOperator(14824, 400)
+	comparator = DotComparator()
+	model_config = ModelConfig(head_operator, tail_operator, comparator, 1305371, 14824, 400, 1, 1000, 1000, 'Adagrad')
+	model = Model(model_config)
+	handler = SimpleHandler('test', model)
+	client_namebook = {1: 12341}
+	server_namebook = {0: 12340}
+	server_config = SharedKVConfig(0, 12340, client_namebook)
+	client_config = SharedKVConfig(1, 12341, server_namebook)
+	server = SharedKVServer(server_config)
+	server.add_handler(handler)
+	p = mp.Process(target=server_proc, args=(server, ))
+	p.start()
+	client = SharedKVClient(client_config, {'test': [1305371, 400]})
+	index = th.randint(0, 1000, [1000])
+	data = th.randn(1000, 400)
+	# print(data[0][0])
+	t0 = time.time()
+	for i in range(100):
+		client.put_entity_embedding('test', index, data)
+		data_ = client.get_entity_embedding('test', index)
+		# print(data_[0][0])
+	t1 = time.time()
+	print(t1 - t0)
+
 if __name__ == '__main__':
-	test_ipc('queue')
+	test_kv()

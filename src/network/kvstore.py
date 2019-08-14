@@ -1,6 +1,7 @@
 from dgl.contrib import KVClient, KVServer
 from .network import BaseServer, BaseClient
 from config import SharedKVConfig
+import time
 
 class CustomKVServer(KVServer):
 	def __init__(self, name, clients, addr):
@@ -13,12 +14,12 @@ class CustomKVServer(KVServer):
 	def _push_handler(self, name, ID, data):
 		if name not in self.handlers:
 			return
-		handlers[name].put_entity(ID, data)
+		self.handlers[name].put_entity(ID, data)
 
 	def _pull_handler(self, name, ID):
 		if name not in self.handlers:
 			return None
-		return handlers[name].get_entity(ID)
+		return self.handlers[name].get_entity(ID)
 
 class SharedKVServer(BaseServer):
 	def __init__(self, config):
@@ -26,11 +27,11 @@ class SharedKVServer(BaseServer):
 		self.addr = config.addr
 		self.name = config.name
 		self.clients = config.namebook
-		self.server = CustomKVServer(server_id=self.name, client_namebook=self.clients, server_addr=self.addr)
+		self.server = CustomKVServer(self.name, self.clients, self.addr)
 
 	def run(self):
 		for name in self.handlers:
-			self.server.add_handler(handlers[name])
+			self.server.add_handler(self.handlers[name])
 		self.server.start()
 
 class SharedKVClient(BaseClient):
@@ -40,18 +41,19 @@ class SharedKVClient(BaseClient):
 		self.name = config.name
 		self.servers = config.namebook
 		self.client = KVClient(client_id = self.name, server_namebook = self.servers, client_addr = self.addr)
-		client.connect()
+		time.sleep(1)
+		self.client.connect()
 		for entity in entity_shape:
-			client.init_data(name=entity, shape=entity_shape[entity], init_type='zero')
+			self.client.init_data(name=entity, shape=entity_shape[entity], init_type='zero')
 
 	def get_entity_embedding(self, name, emb_id):
-		return client.pull(name, emb_id)
+		return self.client.pull(name, emb_id)
 
 	def get_relation_embedding(self, name, emb_id):
 		return None
 
 	def put_entity_embedding(self, name, emb_id, data):
-		client.push(name, emb_id, data)
+		self.client.push(name, emb_id, data)
 
 	def put_relation_embedding(self, name, emb_id, data):
 		pass
