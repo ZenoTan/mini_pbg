@@ -34,3 +34,11 @@ class MultiProcessConfig(object):
 					if src != dst:
 						self.network.append((src, dst))
 		self.method = method
+class SharedKVConfig(object):
+	def __init__(self, name, port, namebook):
+		header = '127.0.0.1:'
+		self.name = name
+		self.addr = header + str(port)
+		self.namebook = {}
+		for name in namebook:
+			self.namebook[name] = header + str(namebook[name])
