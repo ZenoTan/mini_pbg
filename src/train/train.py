@@ -50,6 +50,7 @@ class Trainer(object):
 		self.loss_func = train_config.loss_func
 
 	def train(self):
+		# TODO: split local and remote samples
 		data_loader = DataLoader(self.data_order)
 		dataset = data_loader.load(self.data_path, self.num_edge)
 		head_index = dataset['head_index']
@@ -58,6 +59,7 @@ class Trainer(object):
 		model = Model(self.model_config)
 		model.share_memory()
 		for epoch in range(self.num_epoch):
+			# TODO: last batch may not be complete
 			perm = th.randperm(self.num_edge)
 			head_index = head_index[perm].view(self.num_proc, -1, model.num_chunk * model.pos_num)
 			tail_index = tail_index[perm].view(self.num_proc, -1, model.num_chunk * model.pos_num)

@@ -68,6 +68,7 @@ class Model(nn.Module):
 		if model_config.optim == 'Adagrad':
 			self.optim = th.optim.Adagrad(self.parameters(), lr=0.001)
 
+	# TODO: need seperately foward remote batch
 	def forward(self, head_index, tail_index, head_neg_index, tail_neg_index, rel_index):
 		head = F.embedding(head_index, self.emb, sparse=True)
 		tail = F.embedding(tail_index, self.emb, sparse=True)

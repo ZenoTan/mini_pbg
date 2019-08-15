@@ -57,3 +57,9 @@ class SharedKVClient(BaseClient):
 
 	def put_relation_embedding(self, name, emb_id, data):
 		pass
+
+class GlobalKVServer(SharedKVServer):
+	pass
+
+class GlobalKVClient(SharedKVClient):
+	pass

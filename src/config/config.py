@@ -42,3 +42,9 @@ class SharedKVConfig(object):
 		self.namebook = {}
 		for name in namebook:
 			self.namebook[name] = header + str(namebook[name])
+
+class GlobalKVConfig(object):
+	def __init__(self, name, addr, namebook):
+		self.name = name
+		self.addr = addr
+		self.namebook = namebook
