@@ -2,7 +2,7 @@ import torch as th
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 import time
-from data import DataLoader
+from data import DataLoader, DataSet
 from model import *
 
 def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
@@ -39,8 +39,16 @@ class SoftmaxLoss(Loss):
 		loss = F.cross_entropy(head_scores, self.target) + F.cross_entropy(tail_scores, self.target)
 		return loss
 
-class Trainer(object):
+class BaseTrainer(object):
+	def __init__(self):
+		pass
+
+	def train(self):
+		pass
+
+class Trainer(BaseTrainer):
 	def __init__(self, train_config):
+		super(Trainer, self).__init__()
 		self.data_path = train_config.data_path
 		self.data_order = train_config.data_order
 		self.num_edge = train_config.num_edge
@@ -71,3 +79,19 @@ class Trainer(object):
 				procs.append(p)
 			for p in procs:
 				p.join()
+
+class DistributedTrainer(object):
+	def __init__(self, train_config):
+		self.local_path = train_config.data_path
+		self.remote_paths = train_config.remote_paths
+		self.data_order = train_config.data_order
+		self.local_edge = train_config.num_edge
+		self.remote_edges = train_config.remote_edges
+		self.model_config = train_config.model_config
+		self.num_proc = train_config.num_proc
+		self.num_epoch = train_config.num_epoch
+		self.loss_func = train_config.loss_func
+	
+	def train(self):
+		# TODO: add all together here
+		pass

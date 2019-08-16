@@ -22,6 +22,12 @@ class TrainConfig(object):
 		self.num_epoch = num_epoch
 		self.loss_func = loss_func
 
+class DistributedTrainConfig(TrainConfig):
+	def __init__(self, local_path, remote_paths, data_order, num_edge, remote_edges, model_config, num_proc, num_epoch, loss_func):
+		super(DistributedTrainConfig, self).__init__(local_path, data_order, num_edge, model_config, num_proc, num_epoch, loss_func)
+		self.remote_paths = remote_paths
+		self.remote_edges = remote_edges
+
 class MultiProcessConfig(object):
 	def __init__(self, num_rank, is_connected=True, network=None, method='pipe'):
 		self.num_rank = num_rank
@@ -48,3 +54,9 @@ class GlobalKVConfig(object):
 		self.name = name
 		self.addr = addr
 		self.namebook = namebook
+
+class DataConfig(object):
+	def __init__(self, local_file, shared_files, order):
+		self.local_file = local_file
+		self.shared_files = shared_files
+		self.order = order

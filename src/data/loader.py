@@ -12,15 +12,17 @@ class DataLoader(object):
 		else:
 			self.cols = None
 
-	def load(self, file_name, num_line):
+	def load(self, file_name, num_line=None):
 		if self.cols == None:
 			return None
 		file = open('data/' + file_name)
 		head_index = th.zeros([num_line], dtype=th.long)
 		tail_index = th.zeros([num_line], dtype=th.long)
 		rel_index = th.zeros([num_line], dtype=th.long)
-		for i in range(num_line):
+		num = 0
+		while (not num_line) or num < num_line:
 			line = file.readline()
+			num += 1
 			if line == '':
 				break
 			cols = line.split()
