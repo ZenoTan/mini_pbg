@@ -12,7 +12,7 @@ class DataLoader(object):
 		else:
 			self.cols = None
 
-	def load(self, file_name, num_line=None):
+	def load(self, file_name, num_line):
 		if self.cols == None:
 			return None
 		file = open('data/' + file_name)

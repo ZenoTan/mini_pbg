@@ -56,7 +56,8 @@ class GlobalKVConfig(object):
 		self.namebook = namebook
 
 class DataConfig(object):
-	def __init__(self, local_file, shared_files, order):
-		self.local_file = local_file
-		self.shared_files = shared_files
+	def __init__(self, file, order):
+		self.file_name = file_name
+		self.num_line = num_line
 		self.order = order
+		self.num_proc
