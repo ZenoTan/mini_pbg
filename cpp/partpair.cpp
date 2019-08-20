@@ -27,13 +27,15 @@ namespace part {
 		}
 		file.close();
 	}
-	void PartPair::OutputPair(pair<int, int> p, const string &file_name) {
+	void PartPair::OutputPair(vector<pair<int, int>> pairs, const string &file_name) {
 		ofstream file;
 		file.open(file_name);
-		for (auto &edge: edges[p]) {
-			file << edge[0] << ' ';
-			file << edge[1] << ' ';
-			file << edge[2] << endl;
+		for (auto &p: pairs) {
+			for (auto &edge: edges[p]) {
+				file << edge[0] << ' ';
+				file << edge[1] << ' ';
+				file << edge[2] << endl;
+			}
 		}
 		file.close();
 	}
@@ -42,6 +44,6 @@ namespace part {
 int main() {
 	part::PartPair partpair(86054151, 4, "dataset.txt.part.4");
 	partpair.Process("triple2id.txt");
-	partpair.OutputPair(make_pair<int, int>(0, 0), "0-0.txt");
+	partpair.OutputPair({make_pair<int, int>(0, 0)}, "0-0.txt");
 	return 0;
 }

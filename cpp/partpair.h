@@ -10,7 +10,7 @@ public:
 		
 	}
 	void Process(const string &data_file_name);
-	void OutputPair(pair<int, int> p, const string &file_name);
+	void OutputPair(vector<pair<int, int>> pairs, const string &file_name);
 
 private:
 	const int num_node;
