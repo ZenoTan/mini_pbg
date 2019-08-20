@@ -22,41 +22,25 @@ class TrainConfig(object):
 		self.num_epoch = num_epoch
 		self.loss_func = loss_func
 
-class DistributedTrainConfig(TrainConfig):
-	def __init__(self, local_path, remote_paths, data_order, num_edge, remote_edges, model_config, num_proc, num_epoch, loss_func):
-		super(DistributedTrainConfig, self).__init__(local_path, data_order, num_edge, model_config, num_proc, num_epoch, loss_func)
-		self.remote_paths = remote_paths
-		self.remote_edges = remote_edges
+class DistributedTrainConfig(object):
+	def __init__(self, meta_path, data_path, data_order, num_edge, model_config, num_proc, num_epoch, loss_func):
+		self.meta_path = meta_path
+		self.data_path = data_path
+		self.data_order = data_order
+		self.num_edge = num_edge
+		self.model_config = model_config
+		self.num_proc = num_proc
+		self.num_epoch = num_epoch
+		self.loss_func = loss_func
 
-class MultiProcessConfig(object):
-	def __init__(self, num_rank, is_connected=True, network=None, method='pipe'):
-		self.num_rank = num_rank
-		if not is_connected:
-			self.network = network
-		else:
-			self.network = []
-			for src in range(num_rank):
-				for dst in range(num_rank):
-					if src != dst:
-						self.network.append((src, dst))
-		self.method = method
-class SharedKVConfig(object):
-	def __init__(self, name, port, namebook):
-		header = '127.0.0.1:'
-		self.name = name
-		self.addr = header + str(port)
-		self.namebook = {}
-		for name in namebook:
-			self.namebook[name] = header + str(namebook[name])
-
-class GlobalKVConfig(object):
+class KVConfig(object):
 	def __init__(self, name, addr, namebook):
 		self.name = name
 		self.addr = addr
 		self.namebook = namebook
 
 class DataConfig(object):
-	def __init__(self, file, order):
+	def __init__(self, file_name, order):
 		self.file_name = file_name
 		self.num_line = num_line
 		self.order = order
