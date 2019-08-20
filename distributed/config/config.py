@@ -40,8 +40,11 @@ class KVConfig(object):
 		self.namebook = namebook
 
 class DataConfig(object):
-	def __init__(self, file_name, order):
-		self.file_name = file_name
-		self.num_line = num_line
+	def __init__(self, part, meta_path, data_path, meta_line, data_line, order, num_proc):
+		self.meta_path = meta_path
+		self.data_path = data_path
+		self.meta_line = meta_line
+		self.data_line = data_line
 		self.order = order
 		self.num_proc
+		self.part = part
