@@ -40,15 +40,16 @@ class MetaLoader(object):
 		local = []
 		remote = []
 		file = open('data/' + file_name)
-		num = 0
+		index = 0
 		while num < num_line:
 			line = file.readline()
-			num += 1
 			if line == '':
 				break
-			index, part = line.split()
+			part = str(line)
 			if part == self.part:
 				local.append(index)
 			else:
 				remote.append(index)
+			index += 1
 		return local, remote
+		

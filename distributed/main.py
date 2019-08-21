@@ -21,6 +21,20 @@ def test_train():
 	t1 = time.time()
 	print('Finish all: ' + str(t1 - t0))
 
+def test_distributed():
+	head_operator = ComplExOperator(14824, 400)
+	tail_operator = ComplExOperator(14824, 400)
+	comparator = DotComparator()
+	model_config = ModelConfig(head_operator, tail_operator, comparator, 1305371, 14824, 400, 1, 1000, 1000, 'Adagrad')
+	data_config = DataConfig(0, 'dataset.txt.part.64', '0-0.txt', 86054151, 3200000, 'head-rel-tail', 16)
+	loss_func = SoftmaxLoss(1000)
+	train_config = DistributedTrainConfig(data_config, model_config, 16, 3, loss_func)
+	trainer = Trainer(train_config)
+	t0 = time.time()
+	trainer.train()
+	t1 = time.time()
+	print('Finish all: ' + str(t1 - t0))
+
 def server_proc(server):
 	server.run()
 
@@ -102,4 +116,4 @@ def test_kv():
 	print(t1 - t0)
 
 if __name__ == '__main__':
-	test_kv()
+	test_distributed()

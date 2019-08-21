@@ -23,11 +23,8 @@ class TrainConfig(object):
 		self.loss_func = loss_func
 
 class DistributedTrainConfig(object):
-	def __init__(self, meta_path, data_path, data_order, num_edge, model_config, num_proc, num_epoch, loss_func):
-		self.meta_path = meta_path
-		self.data_path = data_path
-		self.data_order = data_order
-		self.num_edge = num_edge
+	def __init__(self, data_config, model_config, num_proc, num_epoch, loss_func):
+		self.data_config = data_config
 		self.model_config = model_config
 		self.num_proc = num_proc
 		self.num_epoch = num_epoch
@@ -46,5 +43,5 @@ class DataConfig(object):
 		self.meta_line = meta_line
 		self.data_line = data_line
 		self.order = order
-		self.num_proc
+		self.num_proc = num_proc
 		self.part = part

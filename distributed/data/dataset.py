@@ -57,6 +57,7 @@ class Dateset(obejct):
 		perm = th.randperm(self.num_edge)
 		self.head_index = self.head_index[perm]
 		self.tail_index = self.tail_index[perm]
+		self.rel_index = self.rel_index[perm]
 
 	def reset(self):
 		for i in range(self.num_proc):
@@ -64,7 +65,7 @@ class Dateset(obejct):
 
 	def fetch(self, proc, batch_size):
 		if self.proc_cur[proc] >= self.proc_limit[proc]:
-			return None
+			return None, None, None, 0
 		size = batch_size
 		if size > self.proc_limit[proc] - self.proc_cur[proc]:
 			size = self.proc_limit[proc] - self.proc_cur[proc]

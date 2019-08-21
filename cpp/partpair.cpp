@@ -7,7 +7,7 @@ namespace part {
 		int src, dst, rel, src_part, dst_part;
 		string first_line;
 		file >> first_line;
-		for (int i = 0; i < num_node; i++) {
+		for (int i = 0; i < num_edge; i++) {
 			file >> src;
 			file >> dst;
 			file >> rel;
@@ -42,7 +42,7 @@ namespace part {
 }
 
 int main() {
-	part::PartPair partpair(86054151, 4, "dataset.txt.part.4");
+	part::PartPair partpair(86054151, 338586276, 64, "dataset.txt.part.64");
 	partpair.Process("triple2id.txt");
 	partpair.OutputPair({make_pair<int, int>(0, 0)}, "0-0.txt");
 	return 0;

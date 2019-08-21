@@ -21,6 +21,25 @@ def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
 	t1 = time.time()
 	print("Rank " + str(rank) + ": " + str(t1 - t0))
 
+def distributed_proc(model, rank, dataset, loss_func):
+	th.set_num_threads(1)
+	t0 = time.time()
+	batch_size = model.num_chunk * model.pos_num
+	neg_size = model.num_chunk * model.neg_num
+	while True:
+		head_neg_index = th.randint(0, model.ent_size, [neg_size])
+		tail_neg_index = th.randint(0, model.ent_size, [neg_size])
+		model.zero_grad()
+		head_index, tail_index, rel_index, size = dataset.fetch(rank, batch_size)
+		if size < batch_size:
+			break
+		head_pos, head_neg, tail_pos, tail_neg = model(head_index, tail_index, head_neg_index, tail_neg_index, rel_index)
+		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
+		loss.backward()
+		model.optim.step()
+	t1 = time.time()
+	print("Rank " + str(rank) + ": " + str(t1 - t0))
+
 class Loss(object):
 	def __init__(self, batch_size):
 		self.batch_size = batch_size
@@ -82,16 +101,23 @@ class Trainer(BaseTrainer):
 
 class DistributedTrainer(object):
 	def __init__(self, train_config):
-		self.local_path = train_config.data_path
-		self.remote_paths = train_config.remote_paths
-		self.data_order = train_config.data_order
-		self.local_edge = train_config.num_edge
-		self.remote_edges = train_config.remote_edges
+		self.data_config = train_config.data_config
 		self.model_config = train_config.model_config
 		self.num_proc = train_config.num_proc
 		self.num_epoch = train_config.num_epoch
 		self.loss_func = train_config.loss_func
 	
 	def train(self):
-		# TODO: add all together here
-		pass
+		dataset = DataSet(self.data_config)
+		model = Model(self.model_config)
+		model.share_memory()
+		for epoch in range(self.num_epoch):
+			dataset.shuffle()
+			dataset.reset()
+			procs = []
+			for proc in range(self.num_proc):
+				p = mp.Process(target=train_proc, args=(model, proc, dataset, self.loss_func))
+				p.start()
+				procs.append(p)
+			for p in procs:
+				p.join()
