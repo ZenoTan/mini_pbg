@@ -1,2 +1,2 @@
 from .loader import DataLoader
-from .dataset import DataSet
+from .dataset import Dataset

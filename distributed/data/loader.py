@@ -25,10 +25,11 @@ class DataLoader(object):
 			num += 1
 			if line == '':
 				break
-			cols = line.split()
-			head_index[i] = int(cols[self.cols[0]])
-			rel_index[i] = int(cols[self.cols[1]])
-			tail_index[i] = int(cols[self.cols[2]])
+			head, tail, rel = line.split()
+			head = int(head)
+			tail = int(tail)
+			rel = int(rel)
+			head_index[num - 1], tail_index[num - 1], rel_index[num - 1] = head, tail, rel
 		file.close()
 		return {'head_index': head_index, 'tail_index': tail_index, 'rel_index': rel_index}
 
@@ -41,11 +42,11 @@ class MetaLoader(object):
 		remote = []
 		file = open('data/' + file_name)
 		index = 0
-		while num < num_line:
+		while index < num_line:
 			line = file.readline()
 			if line == '':
 				break
-			part = str(line)
+			part = int(line)
 			if part == self.part:
 				local.append(index)
 			else:

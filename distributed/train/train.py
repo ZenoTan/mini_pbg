@@ -2,7 +2,7 @@ import torch as th
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 import time
-from data import DataLoader, DataSet
+from data import DataLoader, Dataset
 from model import *
 
 def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
@@ -108,7 +108,7 @@ class DistributedTrainer(object):
 		self.loss_func = train_config.loss_func
 	
 	def train(self):
-		dataset = DataSet(self.data_config)
+		dataset = Dataset(self.data_config)
 		model = Model(self.model_config)
 		model.share_memory()
 		for epoch in range(self.num_epoch):
@@ -116,7 +116,7 @@ class DistributedTrainer(object):
 			dataset.reset()
 			procs = []
 			for proc in range(self.num_proc):
-				p = mp.Process(target=train_proc, args=(model, proc, dataset, self.loss_func))
+				p = mp.Process(target=distributed_proc, args=(model, proc, dataset, self.loss_func))
 				p.start()
 				procs.append(p)
 			for p in procs:

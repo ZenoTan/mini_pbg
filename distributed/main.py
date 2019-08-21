@@ -1,6 +1,6 @@
 from model import *
 from config import *
-from data import DataLoader
+from data import *
 from train import *
 from network import *
 import torch as th
@@ -26,10 +26,10 @@ def test_distributed():
 	tail_operator = ComplExOperator(14824, 400)
 	comparator = DotComparator()
 	model_config = ModelConfig(head_operator, tail_operator, comparator, 1305371, 14824, 400, 1, 1000, 1000, 'Adagrad')
-	data_config = DataConfig(0, 'dataset.txt.part.64', '0-0.txt', 86054151, 3200000, 'head-tail-rel', 16)
+	data_config = DataConfig(0, 'dataset.txt.part.64', '0-0.txt', 86054151, 400000, 'head-tail-rel', 16)
 	loss_func = SoftmaxLoss(1000)
 	train_config = DistributedTrainConfig(data_config, model_config, 16, 3, loss_func)
-	trainer = Trainer(train_config)
+	trainer = DistributedTrainer(train_config)
 	t0 = time.time()
 	trainer.train()
 	t1 = time.time()
