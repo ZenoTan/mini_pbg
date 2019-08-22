@@ -21,6 +21,8 @@ class DataLoader(object):
 		rel_index = th.zeros([num_line], dtype=th.long)
 		num = 0
 		while num < num_line:
+			if num % 100000 == 0:
+				print(num)
 			line = file.readline()
 			num += 1
 			if line == '':
@@ -43,6 +45,8 @@ class MetaLoader(object):
 		file = open('data/' + file_name)
 		index = 0
 		while index < num_line:
+			if num % 100000 == 0:
+				print(num)
 			line = file.readline()
 			if line == '':
 				break
