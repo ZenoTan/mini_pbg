@@ -11,8 +11,8 @@ class ModelHandler(object):
 	def pull_entity(self, ID):
 		return F.embedding(ID, self.model.emb.data, sparse=True)
 
-	def push_entity(self, ID, data)
-		model.emb.data[ID] = data
+	def push_entity(self, ID, data):
+		self.model.emb.data[ID] = data
 
 	def pull_relation(self):
 		return self.model.head_operator.get_embedding(), self.model.tail_operator.get_embedding()
@@ -42,8 +42,9 @@ class KGClient(object):
 		self.global_local = dataset.global_local
 		self.global_remote = dataset.global_remote
 		self.handler = model_handler
-		self.relation = th.tensor(list(range(0, handler.rel_size)))
-		client.connect()
+		rel_range = list(range(self.handler.rel_size[0]))
+		self.relation = th.tensor(rel_range)
+		self.client.connect()
 
 	def pull_remote(self):
 		data = self.client.pull('entity', self.global_remote)
@@ -64,8 +65,8 @@ class KGClient(object):
 		self.handler.push_relation(head, tail)
 
 	def init_entity(self):
-		client.init_data(name='entity', shape=[handler.ent_size], init_type='zero')
+		self.client.init_data(name='entity', shape=self.handler.ent_size, init_type='zero')
 
 	def init_relation(self):
-		client.init_data(name='head', shape=[handler.rel_size], init_type='zero')
-		client.init_data(name='tail', shape=[handler.rel_size], init_type='zero')
+		self.client.init_data(name='head', shape=self.handler.rel_size, init_type='zero')
+		self.client.init_data(name='tail', shape=self.handler.rel_size, init_type='zero')

@@ -130,6 +130,8 @@ class DistributedTrainer(object):
 		kvconfig = KVConfig(0, '127.0.0.1:51234', {0:'127.0.0.1:55500', 1:'127.0.0.1:55501', 2:'127.0.0.1:55502', 3:'127.0.0.1:55503'})
 		handler = ModelHandler(model)
 		client = KGClient(kvconfig, dataset, handler)
+		client.init_entity()
+		client.init_relation()
 		for epoch in range(self.num_epoch):
 			dataset.shuffle()
 			dataset.reset()
