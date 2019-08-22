@@ -14,6 +14,12 @@ class Operator(nn.Module):
 	def forward(self, input, op_index):
 		pass
 
+	def get_embedding(self):
+		pass
+
+	def put_embedding(self, data):
+		pass
+
 class ComplExOperator(Operator):
 	def __init__(self, rel_size, dim):
 		super(ComplExOperator, self).__init__(rel_size, dim)
@@ -31,6 +37,16 @@ class ComplExOperator(Operator):
 		emb_complex[..., :self.dim // 2] = emb_real * rel_real - emb_imag * rel_imag
 		emb_complex[..., self.dim // 2:] = emb_real * rel_imag + emb_imag * rel_real
 		return emb_complex
+
+	def get_embedding(self):
+		emb = th.zeros(self.rel_size, self.dim)
+		emb[..., :self.dim // 2] = self.real.data
+		emb[..., self.dim // 2:] = self.imag.data
+		return emb
+
+	def put_embedding(self, data):
+		self.real.data = data[..., :self.dim // 2]
+		self.imag.data = data[..., self.dim // 2:]
 
 class Comparator(nn.Module):
 	def __init__(self):

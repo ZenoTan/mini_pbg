@@ -4,6 +4,8 @@ import torch.nn.functional as F
 import time
 from data import DataLoader, Dataset
 from model import *
+from network import *
+from config import *
 
 def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
 	th.set_num_threads(1)
@@ -21,7 +23,7 @@ def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
 	t1 = time.time()
 	print("Rank " + str(rank) + ": " + str(t1 - t0))
 
-def distributed_proc(model, rank, dataset, loss_func):
+def distributed_proc(model, rank, dataset, loss_func, client):
 	th.set_num_threads(1)
 	t0 = time.time()
 	batch_size = model.num_chunk * model.pos_num
@@ -38,8 +40,15 @@ def distributed_proc(model, rank, dataset, loss_func):
 		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
 		loss.backward()
 		model.optim.step()
-		if batch % 100 == 0 and rank == 1:
+		if batch % 20 == 0 and rank == 1:
 			print(batch)
+			sync0 = time.time()
+			client.push_relation()
+			client.pull_relation()
+			client.push_local()
+			client.pull_remote()
+			sync1 = time.time()
+			print("Sync: " + str(sync1 - sync0))
 		batch += 1
 	t1 = time.time()
 	print("Rank " + str(rank) + ": " + str(t1 - t0))
@@ -118,12 +127,15 @@ class DistributedTrainer(object):
 		model.share_memory()
 		t1 = time.time()
 		print('Load and init: ' + str(t1 - t0))
+		kvconfig = KVConfig(0, '127.0.0.1:51234', {0:'127.0.0.1:55500', 1:'127.0.0.1:55501', 2:'127.0.0.1:55502', 3:'127.0.0.1:55503'})
+		handler = ModelHandler(model)
+		client = KGClient(kvconfig, dataset, handler)
 		for epoch in range(self.num_epoch):
 			dataset.shuffle()
 			dataset.reset()
 			procs = []
 			for proc in range(self.num_proc):
-				p = mp.Process(target=distributed_proc, args=(model, proc, dataset, self.loss_func))
+				p = mp.Process(target=distributed_proc, args=(model, proc, dataset, self.loss_func, client))
 				p.start()
 				procs.append(p)
 			for p in procs:
