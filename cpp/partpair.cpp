@@ -42,8 +42,22 @@ namespace part {
 }
 
 int main() {
-	part::PartPair partpair(86054151, 338586276, 64, "dataset.txt.part.64");
+	part::PartPair partpair(86054151, 338586276, 16, "dataset.txt.part.16");
 	partpair.Process("triple2id.txt");
-	partpair.OutputPair({make_pair<int, int>(0, 0)}, "0-0.txt");
+	for (int i = 0; i < 16; i++) {
+		vector<pair<int, int>> pairs;
+		for (int j = 0; j < 16; j++) {
+			int small, large;
+			if (i <= j) {
+				small = i;
+				large = j;
+			} else {
+				small = j;
+				large = i;
+			}
+			pairs.push_back(make_pair<int, int>(small, large));
+		}
+		partpair.OutputPair(pairs, to_string(i) + ".txt")
+	}
 	return 0;
 }
