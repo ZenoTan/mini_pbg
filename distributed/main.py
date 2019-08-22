@@ -2,7 +2,6 @@ from model import *
 from config import *
 from data import *
 from train import *
-from network import *
 import torch as th
 import torch.multiprocessing as mp
 import time
@@ -25,7 +24,7 @@ def test_distributed():
 	head_operator = ComplExOperator(14824, 400)
 	tail_operator = ComplExOperator(14824, 400)
 	comparator = DotComparator()
-	model_config = ModelConfig(head_operator, tail_operator, comparator, 5221479, 14824, 400, 1, 1000, 1000, 'Adagrad')
+	model_config = ModelConfig(head_operator, tail_operator, comparator, 5689771, 14824, 400, 1, 1000, 1000, 'Adagrad')
 	data_config = DataConfig(0, 'dataset.txt.part.16', '0.txt', 86054151, 18966292, 'head-tail-rel', 16)
 	loss_func = SoftmaxLoss(1000)
 	train_config = DistributedTrainConfig(data_config, model_config, 16, 3, loss_func)

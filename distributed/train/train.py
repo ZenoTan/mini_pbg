@@ -26,6 +26,7 @@ def distributed_proc(model, rank, dataset, loss_func):
 	t0 = time.time()
 	batch_size = model.num_chunk * model.pos_num
 	neg_size = model.num_chunk * model.neg_num
+	batch = 0
 	while True:
 		head_neg_index = th.randint(0, model.ent_size, [neg_size])
 		tail_neg_index = th.randint(0, model.ent_size, [neg_size])
@@ -37,6 +38,9 @@ def distributed_proc(model, rank, dataset, loss_func):
 		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
 		loss.backward()
 		model.optim.step()
+		if batch % 100 == 0 and rank == 1:
+			print(batch)
+		batch += 1
 	t1 = time.time()
 	print("Rank " + str(rank) + ": " + str(t1 - t0))
 
@@ -108,9 +112,12 @@ class DistributedTrainer(object):
 		self.loss_func = train_config.loss_func
 	
 	def train(self):
+		t0 = time.time()
 		dataset = Dataset(self.data_config)
 		model = Model(self.model_config)
 		model.share_memory()
+		t1 = time.time()
+		print('Load and init: ' + str(t1 - t0))
 		for epoch in range(self.num_epoch):
 			dataset.shuffle()
 			dataset.reset()

@@ -16,9 +16,9 @@ class DataLoader(object):
 		if self.cols == None:
 			return None
 		file = open('data/' + file_name)
-		head_index = th.zeros([num_line], dtype=th.long)
-		tail_index = th.zeros([num_line], dtype=th.long)
-		rel_index = th.zeros([num_line], dtype=th.long)
+		head_index = []
+		tail_index = []
+		rel_index = []
 		num = 0
 		while num < num_line:
 			if num % 100000 == 0:
@@ -28,10 +28,10 @@ class DataLoader(object):
 			if line == '':
 				break
 			head, tail, rel = line.split()
-			head = int(head)
-			tail = int(tail)
-			rel = int(rel)
-			head_index[num - 1], tail_index[num - 1], rel_index[num - 1] = head, tail, rel
+			head_index.append(int(head))
+			tail_index.append(int(tail))
+			rel_index.append(int(rel))
+			#head_index[num - 1], tail_index[num - 1], rel_index[num - 1] = head, tail, rel
 		file.close()
 		return {'head_index': head_index, 'tail_index': tail_index, 'rel_index': rel_index}
 
@@ -45,8 +45,8 @@ class MetaLoader(object):
 		file = open('data/' + file_name)
 		index = 0
 		while index < num_line:
-			if num % 100000 == 0:
-				print(num)
+			if index % 100000 == 0:
+				print(index)
 			line = file.readline()
 			if line == '':
 				break

@@ -7,9 +7,9 @@ class Dataset(object):
 		data_loader = DataLoader(config.order)
 		print("Load data")
 		index_dict = data_loader.load(config.data_path, config.data_line)
-		self.head_index = index_dict['head_index']
-		self.tail_index = index_dict['tail_index']
-		self.rel_index = index_dict['rel_index']
+		self.head = index_dict['head_index']
+		self.tail = index_dict['tail_index']
+		self.rel = index_dict['rel_index']
 		meta_loader = MetaLoader(config.part)
 		print("Load meta")
 		local_id, remote_id = meta_loader.load(config.meta_path, config.meta_line)
@@ -30,16 +30,19 @@ class Dataset(object):
 		local = 0
 		print("Remap")
 		for i in range(self.num_edge):
-			if self.head_index[i] not in self.to_local:
-				self.to_local[self.head_index[i].item()] = local
-				self.to_global[local] = self.head_index[i].item()
+			if i % 100000 == 0:
+				print(i)
+			if self.head[i] not in self.to_local:
+				self.to_local[self.head[i]] = local
+				self.to_global[local] = self.head[i]
 				local += 1
-			self.head_index[i] = self.to_local[self.head_index[i].item()]
-			if self.tail_index[i] not in self.to_local:
-				self.to_local[self.tail_index[i].item()] = local
-				self.to_global[local] = self.tail_index[i].item()
+			self.head[i] = self.to_local[self.head[i]]
+			if self.tail[i] not in self.to_local:
+				self.to_local[self.tail[i]] = local
+				self.to_global[local] = self.tail[i]
 				local += 1
-			self.tail_index[i] = self.to_local[self.tail_index[i].item()]
+			self.tail[i] = self.to_local[self.tail[i]]
+		self.num_node = local
 		local_local_list = []
 		global_local_list = []
 		local_remote_list = []
@@ -56,6 +59,9 @@ class Dataset(object):
 		self.global_local = th.tensor(global_local_list)
 		self.local_remote = th.tensor(local_remote_list)
 		self.global_remote = th.tensor(global_remote_list)
+		self.head_index = th.tensor(self.head)
+		self.tail_index = th.tensor(self.tail)
+		self.rel_index = th.tensor(self.rel)
 		# self.head_index.share_memory()
 		# self.tail_index.share_memory()
 		# self.rel_index.share_memory()
