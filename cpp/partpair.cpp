@@ -57,7 +57,7 @@ int main() {
 			}
 			pairs.push_back(make_pair<int, int>(small, large));
 		}
-		partpair.OutputPair(pairs, to_string(i) + ".txt")
+		partpair.OutputPair(pairs, to_string(i) + ".txt");
 	}
 	return 0;
 }
