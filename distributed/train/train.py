@@ -30,6 +30,7 @@ def distributed_proc(model, rank, dataset, loss_func, client):
 	neg_size = model.num_chunk * model.neg_num
 	batch = 0
 	while True:
+		#model.rank.data += 1
 		head_neg_index = th.randint(0, model.ent_size, [neg_size])
 		tail_neg_index = th.randint(0, model.ent_size, [neg_size])
 		model.zero_grad()
