@@ -23,7 +23,8 @@ class TrainConfig(object):
 		self.loss_func = loss_func
 
 class DistributedTrainConfig(object):
-	def __init__(self, data_config, model_config, num_proc, num_epoch, loss_func):
+	def __init__(self, data_config, model_config, kvconfig, num_proc, num_epoch, loss_func):
+		self.kvconfig = kvconfig
 		self.data_config = data_config
 		self.model_config = model_config
 		self.num_proc = num_proc

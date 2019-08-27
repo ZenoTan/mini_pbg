@@ -32,7 +32,8 @@ class KGServer(KVServer):
 			for idx in range(ID.shape[0]):
 				self._data_store[name][ID[idx]] = data[idx]
 		else:
-			self._data_store[name][ID[idx]] = 0.94 * self._data_store[name][ID[idx]] + 0.06 * data[idx]
+			for idx in range(ID.shape[0]):
+				self._data_store[name][ID[idx]] = 0.94 * self._data_store[name][ID[idx]] + 0.06 * data[idx]
 
 class KGClient(object):
 	def __init__(self, config, dataset, model_handler):
@@ -42,30 +43,36 @@ class KGClient(object):
 		self.global_local = dataset.global_local
 		self.global_remote = dataset.global_remote
 		self.handler = model_handler
+		self.num_node = dataset.num_node
 		rel_range = list(range(self.handler.rel_size[0]))
 		self.relation = th.tensor(rel_range)
 		self.client.connect()
 
 	def pull_remote(self):
+		print("pull remote")
 		data = self.client.pull('entity', self.global_remote)
 		self.handler.push_entity(self.local_remote, data)
 
 	def push_local(self):
+		print("push local")
 		data = self.handler.pull_entity(self.local_local)
 		self.client.push('entity', self.global_local, data)
 
 	def push_relation(self):
+		print("push relation")
 		head, tail = self.handler.pull_relation()
 		self.client.push('head', self.relation, head)
 		self.client.push('tail', self.relation, tail)
 
 	def pull_relation(self):
+		print("pull relation")
 		head = self.client.pull('head', self.relation)
 		tail = self.client.pull('tail', self.relation)
+		# print("handler push relation")
 		self.handler.push_relation(head, tail)
 
 	def init_entity(self):
-		self.client.init_data(name='entity', shape=self.handler.ent_size, init_type='zero')
+		self.client.init_data(name='entity', shape=[self.num_node], init_type='zero')
 
 	def init_relation(self):
 		self.client.init_data(name='head', shape=self.handler.rel_size, init_type='zero')

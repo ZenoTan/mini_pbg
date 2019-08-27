@@ -14,6 +14,8 @@ class Dataset(object):
 		print("Load meta")
 		local_id, remote_id = meta_loader.load(config.meta_path, config.meta_line)
 		self.num_edge = config.data_line
+		self.num_node = config.meta_line
+		print(self.num_node)
 		self.num_proc = config.num_proc
 		self.proc_start = self.num_proc * [0]
 		self.proc_limit = self.num_proc * [0]
@@ -47,10 +49,13 @@ class Dataset(object):
 		global_local_list = []
 		local_remote_list = []
 		global_remote_list = []
+		node_max = 0
 		for node in local_id:
 			if node in self.to_local:
 				global_local_list.append(node)
 				local_local_list.append(self.to_local[node])
+			if node > node_max:
+				node_max = node
 		for node in remote_id:
 			if node in self.to_local:
 				global_remote_list.append(node)
@@ -62,6 +67,7 @@ class Dataset(object):
 		self.head_index = th.tensor(self.head)
 		self.tail_index = th.tensor(self.tail)
 		self.rel_index = th.tensor(self.rel)
+		print('Node max: ' + str(node_max))
 		# self.head_index.share_memory()
 		# self.tail_index.share_memory()
 		# self.rel_index.share_memory()

@@ -40,13 +40,13 @@ def distributed_proc(model, rank, dataset, loss_func, client):
 		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
 		loss.backward()
 		model.optim.step()
-		if batch % 20 == 0 and rank == 1:
+		if batch % 20 == 19 and rank == 1:
 			print(batch)
 			sync0 = time.time()
-			client.push_relation()
 			client.pull_relation()
-			client.push_local()
-			client.pull_remote()
+			#client.push_relation()
+			#client.pull_remote()
+			#client.push_local()
 			sync1 = time.time()
 			print("Sync: " + str(sync1 - sync0))
 		batch += 1
@@ -119,6 +119,7 @@ class DistributedTrainer(object):
 		self.num_proc = train_config.num_proc
 		self.num_epoch = train_config.num_epoch
 		self.loss_func = train_config.loss_func
+		self.kvconfig = train_config.kvconfig
 	
 	def train(self):
 		t0 = time.time()
@@ -127,11 +128,12 @@ class DistributedTrainer(object):
 		model.share_memory()
 		t1 = time.time()
 		print('Load and init: ' + str(t1 - t0))
-		kvconfig = KVConfig(0, '127.0.0.1:51234', {0:'127.0.0.1:55500', 1:'127.0.0.1:55501', 2:'127.0.0.1:55502', 3:'127.0.0.1:55503'})
 		handler = ModelHandler(model)
-		client = KGClient(kvconfig, dataset, handler)
+		client = KGClient(self.kvconfig, dataset, handler)
 		client.init_entity()
 		client.init_relation()
+		client.pull_relation()
+		client.push_relation()
 		for epoch in range(self.num_epoch):
 			dataset.shuffle()
 			dataset.reset()
