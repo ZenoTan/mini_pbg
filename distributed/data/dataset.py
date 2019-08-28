@@ -15,7 +15,7 @@ class Dataset(object):
 		local_id, remote_id = meta_loader.load(config.meta_path, config.meta_line)
 		self.num_edge = config.data_line
 		self.num_node = config.meta_line
-		print(self.num_node)
+		#print(self.num_node)
 		self.num_proc = config.num_proc
 		self.proc_start = self.num_proc * [0]
 		self.proc_limit = self.num_proc * [0]
@@ -44,7 +44,7 @@ class Dataset(object):
 				self.to_global[local] = self.tail[i]
 				local += 1
 			self.tail[i] = self.to_local[self.tail[i]]
-		self.num_node = local
+		#self.num_node = local
 		local_local_list = []
 		global_local_list = []
 		local_remote_list = []

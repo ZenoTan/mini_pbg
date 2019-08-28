@@ -72,7 +72,7 @@ class KGClient(object):
 		self.handler.push_relation(head, tail)
 
 	def init_entity(self):
-		self.client.init_data(name='entity', shape=[self.num_node], init_type='zero')
+		self.client.init_data(name='entity', shape=[self.num_node, self.handler.ent_size[1]], init_type='zero')
 
 	def init_relation(self):
 		self.client.init_data(name='head', shape=self.handler.rel_size, init_type='zero')
