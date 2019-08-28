@@ -23,7 +23,12 @@ def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
 	t1 = time.time()
 	print("Rank " + str(rank) + ": " + str(t1 - t0))
 
-def distributed_proc(model, rank, dataset, loss_func, client):
+def distributed_proc(model, rank, dataset, loss_func, kvconfig):
+	if not hasattr(distributed_proc, 'client') and :
+		distributed_proc.client = KGClient(self.kvconfig, dataset, handler)
+		distribtued_proc.client.init_entity()
+		distribtued_proc.client.init_relation()
+		print("Create client")
 	th.set_num_threads(1)
 	t0 = time.time()
 	batch_size = model.num_chunk * model.pos_num
@@ -41,18 +46,35 @@ def distributed_proc(model, rank, dataset, loss_func, client):
 		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
 		loss.backward()
 		model.optim.step()
+		'''
 		if batch % 20 == 19 and rank == 1:
 			print(batch)
 			sync0 = time.time()
-			client.pull_relation()
-			#client.push_relation()
-			#client.pull_remote()
-			#client.push_local()
+			distribtued_proc.client.pull_relation()
+			distribtued_proc.client.push_relation()
+			distribtued_proc.client.pull_remote()
+			distribtued_proc.client.push_local()
 			sync1 = time.time()
 			print("Sync: " + str(sync1 - sync0))
+		'''
 		batch += 1
 	t1 = time.time()
 	print("Rank " + str(rank) + ": " + str(t1 - t0))
+
+def sync_proc(freq, model, dataset, kvconfig):
+	handler = ModelHandler(model)
+	client = KGClient(kvconfig, dataset, handler)
+	client.init_relation()
+	client.init_entity()
+	while True:
+		time.sleep(freq)
+		sync0 = time.time()
+		distribtued_proc.client.pull_relation()
+		distribtued_proc.client.push_relation()
+		distribtued_proc.client.pull_remote()
+		distribtued_proc.client.push_local()
+		sync1 = time.time()
+		print("Sync: " + str(sync1 - sync0))
 
 class Loss(object):
 	def __init__(self, batch_size):
@@ -129,19 +151,16 @@ class DistributedTrainer(object):
 		model.share_memory()
 		t1 = time.time()
 		print('Load and init: ' + str(t1 - t0))
-		handler = ModelHandler(model)
-		client = KGClient(self.kvconfig, dataset, handler)
-		client.init_entity()
-		client.init_relation()
-		client.pull_relation()
-		client.push_relation()
+		sync_proc = mp.Process(target=sync_proc, args=(0.2, model, dataset, self.kvconfig))
+		sync_proc.start()
 		for epoch in range(self.num_epoch):
 			dataset.shuffle()
 			dataset.reset()
 			procs = []
 			for proc in range(self.num_proc):
-				p = mp.Process(target=distributed_proc, args=(model, proc, dataset, self.loss_func, client))
+				p = mp.Process(target=distributed_proc, args=(model, proc, dataset, self.loss_func))
 				p.start()
 				procs.append(p)
 			for p in procs:
 				p.join()
+		sync_proc.join()
