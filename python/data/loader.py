@@ -20,14 +20,14 @@ class DataLoader(object):
 		tail_index = th.zeros([num_line], dtype=th.long)
 		rel_index = th.zeros([num_line], dtype=th.long)
 		num = 0
-		while (not num_line) or num < num_line:
+		while num < num_line:
 			line = file.readline()
-			num += 1
 			if line == '':
 				break
 			cols = line.split()
-			head_index[i] = int(cols[self.cols[0]])
-			rel_index[i] = int(cols[self.cols[1]])
-			tail_index[i] = int(cols[self.cols[2]])
+			head_index[num] = int(cols[self.cols[0]])
+			rel_index[num] = int(cols[self.cols[1]])
+			tail_index[num] = int(cols[self.cols[2]])
+			num += 1
 		file.close()
 		return {'head_index': head_index, 'tail_index': tail_index, 'rel_index': rel_index}

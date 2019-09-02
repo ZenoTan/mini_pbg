@@ -85,8 +85,8 @@ class Model(nn.Module):
 		tail_neg_index = th.cat((tail_index, tail_neg_index), dim=-1)
 		head_neg = F.embedding(head_neg_index, self.emb, sparse=True)
 		tail_neg = F.embedding(tail_neg_index, self.emb, sparse=True)
-		head = head.view(self.num_chunk, self.pos_num, self.dim)
-		tail = tail.view(self.num_chunk, self.pos_num, self.dim)
+		#head = head.view(self.num_chunk, self.pos_num, self.dim)
+		#tail = tail.view(self.num_chunk, self.pos_num, self.dim)
 		head_neg = head_neg.view(self.num_chunk, self.pos_num + self.neg_num, self.dim)
 		tail_neg = tail_neg.view(self.num_chunk, self.pos_num + self.neg_num, self.dim)
 		if self.head_operator:
@@ -97,6 +97,10 @@ class Model(nn.Module):
 			tail_ = self.tail_operator(tail, rel_index)
 		else:
 			tail_ = tail
+		head_ = head_.view(self.num_chunk, self.pos_num, self.dim)
+		tail_ = tail_.view(self.num_chunk, self.pos_num, self.dim)
+		head = head.view(self.num_chunk, self.pos_num, self.dim)
+		tail = tail.view(self.num_chunk, self.pos_num, self.dim)
 		head_pos_scores, head_neg_scores = self.comparator(head_, tail, tail_neg)
 		tail_pos_scores, tail_neg_scores = self.comparator(tail_, head, head_neg)
 		head_neg_scores += self.mask
