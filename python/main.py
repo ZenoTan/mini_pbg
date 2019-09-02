@@ -8,8 +8,8 @@ import torch.multiprocessing as mp
 import time
 
 def test_train():
-	head_operator = ComplExOperator(14824, 400)
-	tail_operator = ComplExOperator(14824, 400)
+	head_operator = DismultOperator(14824, 400)
+	tail_operator = DismultOperator(14824, 400)
 	comparator = DotComparator()
 	model_config = ModelConfig(head_operator, tail_operator, comparator, 1305371, 14824, 400, 8, 128, 256, 'Adagrad')
 	# model = Model(config)
