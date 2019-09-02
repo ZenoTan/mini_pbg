@@ -11,15 +11,23 @@ def train_proc(model, rank, head_index, tail_index, rel_index, loss_func):
 	head_neg_index = th.randint(0, model.ent_size, [num_iter, model.num_chunk * model.neg_num])
 	tail_neg_index = th.randint(0, model.ent_size, [num_iter, model.num_chunk * model.neg_num])
 	# rel_neg_index = th.randint(0, model.rel_size, [num_iter, model.num_chunk * model.neg_num])
-	t0 = time.time()
+	forward_time = 0.0
+	backward_time = 0.0
+	#t0 = time.time()
 	for i in range(num_iter):
+		t0 = time.time()
 		model.zero_grad()
 		head_pos, head_neg, tail_pos, tail_neg = model(head_index[i], tail_index[i], head_neg_index[i], tail_neg_index[i], rel_index[i])
 		loss = loss_func.loss(head_pos, head_neg, tail_pos, tail_neg)
+		t1 = time.time()
 		loss.backward()
+		t2 = time.time()
 		model.optim.step()
-	t1 = time.time()
-	print("Rank " + str(rank) + ": " + str(t1 - t0))
+		forward_time += t1 - t0
+		backward_time += t2 - t1
+	#t1 = time.time()
+	print("Rank " + str(rank) + "forward: " + str(forward_time))
+	print("Rank " + str(rank) + "backward: " + str(backward_time))
 
 class Loss(object):
 	def __init__(self, batch_size):

@@ -32,6 +32,15 @@ class ComplExOperator(Operator):
 		emb_complex[..., self.dim // 2:] = emb_real * rel_imag + emb_imag * rel_real
 		return emb_complex
 
+class DismultOperator(Operator):
+	def __init__(self, rel_size, dim):
+		super(DismultOperator, self).__init__(rel_size, dim)
+		self.relation = nn.Parameter(th.rand(rel_size, dim))
+
+	def forward(self, emb, rel_index):
+		rel = F.embedding(rel_index, self.relation, sparse=True)
+		return emb * rel
+
 class Comparator(nn.Module):
 	def __init__(self):
 		super(Comparator, self).__init__()
@@ -98,8 +107,8 @@ class Model(nn.Module):
 		# tail_neg_scores.flatten(0, 1)
 		# head_pos_scores.unsqueeze(1)
 		# tail_pos_scores.unsqueeze(1)
-		head_pos_scores = head_pos_scores.view(self.pos_num, -1)
-		tail_pos_scores = tail_pos_scores.view(self.pos_num, -1)
-		head_neg_scores = head_neg_scores.view(self.pos_num, -1)
-		tail_neg_scores = tail_neg_scores.view(self.pos_num, -1)
+		head_pos_scores = head_pos_scores.view(self.pos_num * self.num_chunk, -1)
+		tail_pos_scores = tail_pos_scores.view(self.pos_num * self.num_chunk, -1)
+		head_neg_scores = head_neg_scores.view(self.pos_num * self.num_chunk, -1)
+		tail_neg_scores = tail_neg_scores.view(self.pos_num * self.num_chunk, -1)
 		return head_pos_scores, tail_pos_scores, head_neg_scores, tail_neg_scores

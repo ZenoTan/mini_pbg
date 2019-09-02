@@ -13,7 +13,7 @@ def test_train():
 	comparator = DotComparator()
 	model_config = ModelConfig(head_operator, tail_operator, comparator, 1305371, 14824, 400, 8, 128, 256, 'Adagrad')
 	# model = Model(config)
-	loss_func = SoftmaxLoss(1000)
+	loss_func = SoftmaxLoss(1024)
 	train_config = TrainConfig('part0.txt', 'head-tail-rel', 192 * 1024,  model_config, 16, 1, loss_func)
 	trainer = Trainer(train_config)
 	t0 = time.time()
